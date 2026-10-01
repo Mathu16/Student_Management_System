@@ -10,6 +10,9 @@ from app.routers.auth import router as auth_router
 # Import the student router
 from app.routers.student import router as student_router
 
+# Import the course router
+from app.routers.course import router as course_router
+
 # Create a FastAPI application object
 app = FastAPI(
     title="Student Data Management System",
@@ -23,6 +26,8 @@ app.include_router(auth_router)
 # Register the student router
 app.include_router(student_router)
 
+# Register the course router
+app.include_router(course_router)
 
 # Create a GET API endpoint for testing
 @app.get("/")
