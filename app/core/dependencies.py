@@ -54,3 +54,18 @@ def get_current_admin(
 
     # Return the authenticated admin information
     return current_user
+
+    # Check whether the authenticated user is a student
+def get_current_student(
+    current_user: dict = Depends(get_current_user)
+):
+    # Check the role stored in the JWT token
+    if current_user.get("role") != "student":
+        # Reject the request when the user is not a student
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Student access required"
+        )
+
+    # Return the authenticated student information
+    return current_user

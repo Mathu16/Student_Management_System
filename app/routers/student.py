@@ -14,7 +14,7 @@ from app.models.student import Student
 from app.schemas.student import StudentCreate, StudentUpdate, StudentResponse
 
 # Import the admin authentication dependency
-from app.core.dependencies import get_current_admin
+from app.core.dependencies import get_current_admin, get_current_student
 
 # Import the password hashing function
 from app.core.security import hash_password
@@ -59,8 +59,41 @@ def create_student(
 
     # Return the created student
     return student
+# Get the profile of the currently logged-in student
+@router.get("/me", response_model=StudentResponse)
+def get_my_profile(
+    db: Session = Depends(get_db),
+    current_student: dict = Depends(get_current_student)
+):
+    # Get the student ID from the JWT token
+    student_id = current_student.get("user_id")
 
-    # Get all students
+    # Find the student using the ID from the token
+    student = db.query(Student).filter(
+        Student.id == student_id
+    ).first()
+
+    # Check whether the student exists
+    if not student:
+        # Return an error if the student was not found
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found"
+        )
+
+    # Print the action in the terminal
+    print(
+        f"Student viewed own profile - "
+        f"ID: {student.id}, Email: {student.email}"
+    )
+
+    # Return the student's own profile
+    return student
+
+
+# Get all students
 @router.get("/", response_model=list[StudentResponse])
 def get_all_students(
     db: Session = Depends(get_db),
@@ -159,7 +192,7 @@ def update_student(
     # Return the updated student
     return student
 
-    # Delete an existing student
+# Delete an existing student
 @router.delete("/{student_id}")
 def delete_student(
     student_id: int,
@@ -200,3 +233,4 @@ def delete_student(
     return {
         "message": "Student deleted successfully"
     }
+
