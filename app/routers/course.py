@@ -144,7 +144,6 @@ def update_course(
 
     # Check whether the course exists
     if not course:
-        from fastapi import HTTPException
 
         raise HTTPException(
             status_code=404,
@@ -158,7 +157,6 @@ def update_course(
 
     # Reject the request if the student does not exist
     if not student:
-        from fastapi import HTTPException
 
         raise HTTPException(
             status_code=404,
@@ -207,7 +205,6 @@ def delete_course(
 
     # Check whether the course exists
     if not course:
-        from fastapi import HTTPException
 
         raise HTTPException(
             status_code=404,
