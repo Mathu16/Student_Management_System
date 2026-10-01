@@ -7,6 +7,8 @@ from app.db.database import engine
 # Import the authentication router
 from app.routers.auth import router as auth_router
 
+# Import the student router
+from app.routers.student import router as student_router
 
 # Create a FastAPI application object
 app = FastAPI(
@@ -17,6 +19,9 @@ app = FastAPI(
 
 # Register the authentication router
 app.include_router(auth_router)
+
+# Register the student router
+app.include_router(student_router)
 
 
 # Create a GET API endpoint for testing

@@ -39,3 +39,18 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
             detail="Invalid or expired authentication token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+# Check whether the authenticated user is an admin
+def get_current_admin(
+    current_user: dict = Depends(get_current_user)
+):
+    # Check the role stored in the JWT token
+    if current_user.get("role") != "admin":
+        # Reject the request when the user is not an admin
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
+
+    # Return the authenticated admin information
+    return current_user

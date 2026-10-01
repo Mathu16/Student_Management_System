@@ -1,5 +1,8 @@
-# Import APIRouter and HTTPException from FastAPI
-from fastapi import APIRouter, HTTPException
+# Import APIRouter, HTTPException, and Depends from FastAPI
+from fastapi import APIRouter, HTTPException, Depends
+
+# Import OAuth2PasswordRequestForm for Swagger OAuth2 login
+from fastapi.security import OAuth2PasswordRequestForm
 
 # Import the database session dependency
 from app.db.database import get_db
@@ -16,9 +19,6 @@ from app.core.security import verify_password
 # Import the JWT token creation function
 from app.core.jwt import create_access_token
 
-# Import Depends for database dependency injection
-from fastapi import Depends
-
 # Import Session from SQLAlchemy
 from sqlalchemy.orm import Session
 
@@ -33,10 +33,15 @@ router = APIRouter(
 # Create the login endpoint
 @router.post("/login")
 def login(
-    username: str,
-    password: str,
+    form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
+    # Get the username entered in Swagger
+    username = form_data.username
+
+    # Get the password entered in Swagger
+    password = form_data.password
+
     # First, search for an admin using the provided username
     admin = db.query(Admin).filter(
         Admin.username == username
@@ -52,7 +57,7 @@ def login(
         })
 
         # Print the successful login action in the terminal
-        print(f"Admin login successful: {admin.username}")
+        print(f"Admin login successful - Username: {admin.username}")
 
         # Return the access token
         return {
@@ -60,7 +65,6 @@ def login(
             "token_type": "bearer",
             "role": "admin"
         }
-
 
     # Search for a student using the provided email address
     student = db.query(Student).filter(
@@ -77,7 +81,7 @@ def login(
         })
 
         # Print the successful login action in the terminal
-        print(f"Student login successful: {student.email}")
+        print(f"Student login successful - Email: {student.email}")
 
         # Return the access token
         return {
@@ -86,6 +90,8 @@ def login(
             "role": "student"
         }
 
+    # Print the failed login attempt in the terminal
+    print(f"Login failed - Username: {username}")
 
     # Return an error when the username/password is incorrect
     raise HTTPException(
