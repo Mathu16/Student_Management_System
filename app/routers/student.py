@@ -73,7 +73,7 @@ def create_student(
     # Return the created student
     return student
 
-    
+
 # Get the profile of the currently logged-in student
 @router.get("/me", response_model=StudentResponse)
 def get_my_profile(
@@ -178,8 +178,23 @@ def update_student(
     if student_data.full_name is not None:
         student.full_name = student_data.full_name
 
-    # Update the student's email if a new email was provided
+    # Check whether a new email was provided
     if student_data.email is not None:
+
+        # Check whether the new email already belongs to another student
+        existing_student = db.query(Student).filter(
+            Student.email == student_data.email,
+            Student.id != student_id
+        ).first()
+
+        # Reject the update if the email is already used by another student
+        if existing_student:
+            raise HTTPException(
+                status_code=400,
+                detail="Student email already exists"
+            )
+
+        # Update the student's email
         student.email = student_data.email
 
     # Update the student's phone if a new phone number was provided
