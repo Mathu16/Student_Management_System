@@ -166,6 +166,20 @@ def update_course(
     # Update the course name
     course.course_name = course_data.course_name
 
+    # Check whether the new course code already belongs to another course
+    if course_data.course_code != course.course_code:
+        existing_course = db.query(Course).filter(
+            Course.course_code == course_data.course_code,
+            Course.id != course_id
+        ).first()
+
+        # Reject the update if the course code is already used
+        if existing_course:
+            raise HTTPException(
+                status_code=400,
+                detail="Course code already exists"
+            )
+
     # Update the course code
     course.course_code = course_data.course_code
 
