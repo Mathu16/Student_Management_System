@@ -4,12 +4,19 @@ from fastapi import FastAPI
 # Import the database engine
 from app.db.database import engine
 
+# Import the authentication router
+from app.routers.auth import router as auth_router
+
+
 # Create a FastAPI application object
 app = FastAPI(
     title="Student Data Management System",
     description="Backend API for managing students and courses",
     version="1.0.0"
 )
+
+# Register the authentication router
+app.include_router(auth_router)
 
 
 # Create a GET API endpoint for testing

@@ -1,0 +1,41 @@
+# Import Depends to use FastAPI dependency injection
+from fastapi import Depends
+
+# Import HTTPException to return authentication errors
+from fastapi import HTTPException
+
+# Import status codes used by FastAPI
+from fastapi import status
+
+# Import OAuth2PasswordBearer to read the JWT token
+from fastapi.security import OAuth2PasswordBearer
+
+# Import JWTError to handle invalid JWT tokens
+from jose import JWTError
+
+# Import our JWT decoding function
+from app.core.jwt import decode_access_token
+
+
+# Tell FastAPI where users will obtain their login token
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
+
+# Get the current authenticated user from the JWT token
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    # Try to decode and verify the JWT token
+    try:
+        # Decode the JWT token
+        payload = decode_access_token(token)
+
+        # Return the information stored inside the token
+        return payload
+
+    # Handle an invalid or expired JWT token
+    except JWTError:
+        # Return an authentication error
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired authentication token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
