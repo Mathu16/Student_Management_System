@@ -1,5 +1,5 @@
 # Import APIRouter and Depends from FastAPI
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 # Import Session to work with the database
 from sqlalchemy.orm import Session
@@ -34,6 +34,19 @@ def create_student(
     db: Session = Depends(get_db),
     current_admin: dict = Depends(get_current_admin)
 ):
+
+    # Check whether the email already exists
+    existing_student = db.query(Student).filter(
+        Student.email == student_data.email
+    ).first()
+
+    # Reject the request if the email is already registered
+    if existing_student:
+        raise HTTPException(
+            status_code=400,
+            detail="Student email already exists"
+        )
+
     # Create a new student object
     student = Student(
         full_name=student_data.full_name,
@@ -59,6 +72,8 @@ def create_student(
 
     # Return the created student
     return student
+
+    
 # Get the profile of the currently logged-in student
 @router.get("/me", response_model=StudentResponse)
 def get_my_profile(
@@ -75,8 +90,6 @@ def get_my_profile(
 
     # Check whether the student exists
     if not student:
-        # Return an error if the student was not found
-        from fastapi import HTTPException
 
         raise HTTPException(
             status_code=404,
@@ -125,8 +138,6 @@ def get_student_by_id(
 
     # Check whether the student exists
     if not student:
-        # Return an error if the student was not found
-        from fastapi import HTTPException
 
         raise HTTPException(
             status_code=404,
@@ -157,8 +168,6 @@ def update_student(
 
     # Check whether the student exists
     if not student:
-        # Return an error if the student was not found
-        from fastapi import HTTPException
 
         raise HTTPException(
             status_code=404,
@@ -206,8 +215,6 @@ def delete_student(
 
     # Check whether the student exists
     if not student:
-        # Return an error if the student was not found
-        from fastapi import HTTPException
 
         raise HTTPException(
             status_code=404,

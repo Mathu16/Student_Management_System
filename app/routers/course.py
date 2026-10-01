@@ -1,5 +1,5 @@
 # Import APIRouter and Depends from FastAPI
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 # Import Session to work with the database
 from sqlalchemy.orm import Session
@@ -42,12 +42,25 @@ def create_course(
 
     # Reject the request if the student does not exist
     if not student:
-        from fastapi import HTTPException
 
         raise HTTPException(
             status_code=404,
             detail="Student not found"
         )
+
+
+    # Check whether the course code already exists
+    existing_course = db.query(Course).filter(
+        Course.course_code == course_data.course_code
+    ).first()
+
+    # Reject the request if the course code is already registered
+    if existing_course:
+        raise HTTPException(
+            status_code=400,
+            detail="Course code already exists"
+        )
+
 
     # Create a new course object
     course = Course(
