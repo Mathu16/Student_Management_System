@@ -10,6 +10,9 @@ from app.db.database import get_db
 # Import the Course database model
 from app.models.course import Course
 
+# Import the Student database model
+from app.models.student import Student
+
 # Import the course request and response schemas
 from app.schemas.course import CourseCreate, CourseResponse
 
@@ -31,6 +34,21 @@ def create_course(
     db: Session = Depends(get_db),
     current_admin: dict = Depends(get_current_admin)
 ):
+
+     # Check whether the student exists
+    student = db.query(Student).filter(
+        Student.id == course_data.student_id
+    ).first()
+
+    # Reject the request if the student does not exist
+    if not student:
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found"
+        )
+
     # Create a new course object
     course = Course(
         course_name=course_data.course_name,
@@ -75,3 +93,130 @@ def get_all_courses(
 
     # Return the list of courses
     return courses
+
+# Get all courses belonging to a specific student
+@router.get("/student/{student_id}", response_model=list[CourseResponse])
+def get_student_courses(
+    student_id: int,
+    db: Session = Depends(get_db),
+    current_admin: dict = Depends(get_current_admin)
+):
+    # Get all courses for the specified student
+    courses = db.query(Course).filter(
+        Course.student_id == student_id
+    ).all()
+
+    # Print the action in the terminal
+    print(
+        f"Student courses viewed by admin - "
+        f"Student ID: {student_id}, "
+        f"Course Count: {len(courses)}"
+    )
+
+    # Return the student's courses
+    return courses
+
+# Update an existing course
+@router.put("/{course_id}", response_model=CourseResponse)
+def update_course(
+    course_id: int,
+    course_data: CourseCreate,
+    db: Session = Depends(get_db),
+    current_admin: dict = Depends(get_current_admin)
+):
+    # Find the course using the provided course ID
+    course = db.query(Course).filter(
+        Course.id == course_id
+    ).first()
+
+    # Check whether the course exists
+    if not course:
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found"
+        )
+
+    # Check whether the new student exists
+    student = db.query(Student).filter(
+        Student.id == course_data.student_id
+    ).first()
+
+    # Reject the request if the student does not exist
+    if not student:
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found"
+        )
+
+    # Update the course name
+    course.course_name = course_data.course_name
+
+    # Update the course code
+    course.course_code = course_data.course_code
+
+    # Update the course description
+    course.description = course_data.description
+
+    # Update the student assigned to the course
+    course.student_id = course_data.student_id
+
+    # Save the changes to the database
+    db.commit()
+
+    # Refresh the course object with updated data
+    db.refresh(course)
+
+    # Print the action in the terminal
+    print(
+        f"Course updated successfully - "
+        f"ID: {course.id}, "
+        f"Course: {course.course_name}"
+    )
+
+    # Return the updated course
+    return course
+
+    # Delete an existing course
+@router.delete("/{course_id}")
+def delete_course(
+    course_id: int,
+    db: Session = Depends(get_db),
+    current_admin: dict = Depends(get_current_admin)
+):
+    # Find the course using the provided course ID
+    course = db.query(Course).filter(
+        Course.id == course_id
+    ).first()
+
+    # Check whether the course exists
+    if not course:
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found"
+        )
+
+    # Save the course name before deleting the record
+    course_name = course.course_name
+
+    # Delete the course from the database
+    db.delete(course)
+
+    # Save the deletion to the database
+    db.commit()
+
+    # Print the action in the terminal
+    print(
+        f"Course deleted successfully - "
+        f"ID: {course_id}, Course: {course_name}"
+    )
+
+    # Return a success message
+    return {
+        "message": "Course deleted successfully"
+    }
