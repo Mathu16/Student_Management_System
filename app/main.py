@@ -12,12 +12,23 @@ from app.routers.student import router as student_router
 
 # Import the course router
 from app.routers.course import router as course_router
+from fastapi.middleware.cors import CORSMiddleware
 
 # Create a FastAPI application object
 app = FastAPI(
     title="Student Data Management System",
     description="Backend API for managing students and courses",
     version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Register the authentication router
