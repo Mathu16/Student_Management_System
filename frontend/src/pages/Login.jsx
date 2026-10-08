@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 
 
@@ -7,6 +8,9 @@ function Login(){
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
+    const navigate = useNavigate();
+
+
 
     const handleLogin = async () => {
 
@@ -14,8 +18,16 @@ function Login(){
 
             const formData = new FormData();
 
-            formData.append("username", username);
-            formData.append("password", password);
+            formData.append(
+                "username",
+                username
+            );
+
+            formData.append(
+                "password",
+                password
+            );
+
 
 
             const response = await API.post(
@@ -24,11 +36,17 @@ function Login(){
             );
 
 
+
+            // Save JWT token
+
             localStorage.setItem(
                 "token",
                 response.data.access_token
             );
 
+
+
+            // Save user role
 
             localStorage.setItem(
                 "role",
@@ -36,57 +54,111 @@ function Login(){
             );
 
 
-            console.log("Login successful");
+
+            alert("Login successful");
 
 
-        } catch(error){
+
+            // Redirect based on user role
+
+            if(response.data.role === "admin"){
+
+                navigate("/admin");
+
+            }
+            else if(response.data.role === "student"){
+
+                navigate("/student");
+
+            }
+
+
+
+        }
+
+        catch(error){
 
             console.log(error);
+
+            alert("Login failed");
 
         }
 
     };
 
 
+
     return(
 
-        <div>
-
-            <h1>
-                Student Management System
-            </h1>
+        <div className="login-page">
 
 
-            <h2>
-                Login
-            </h2>
+            <div className="login-card">
 
 
-            <input
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e)=>setUsername(e.target.value)}
-            />
+                <h1>
+                    Student Management System
+                </h1>
 
 
-            <br/><br/>
+
+                <h2>
+                    Login
+                </h2>
 
 
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e)=>setPassword(e.target.value)}
-            />
+
+                <input
+
+                    type="text"
+
+                    placeholder="Username"
+
+                    value={username}
+
+                    onChange={(e)=>
+                        setUsername(e.target.value)
+                    }
+
+                />
 
 
-            <br/><br/>
+
+                <br/><br/>
 
 
-            <button onClick={handleLogin}>
-                Login
-            </button>
+
+                <input
+
+                    type="password"
+
+                    placeholder="Password"
+
+                    value={password}
+
+                    onChange={(e)=>
+                        setPassword(e.target.value)
+                    }
+
+                />
+
+
+
+                <br/><br/>
+
+
+
+                <button
+                    onClick={handleLogin}
+                >
+
+                    Login
+
+                </button>
+
+
+
+            </div>
 
 
         </div>

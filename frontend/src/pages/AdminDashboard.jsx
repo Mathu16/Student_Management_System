@@ -3,6 +3,7 @@ import API from "../services/api";
 import CreateStudent from "../components/CreateStudent";
 import UpdateStudent from "../components/UpdateStudent";
 
+
 function AdminDashboard(){
 
     const [students, setStudents] = useState([]);
@@ -17,7 +18,8 @@ function AdminDashboard(){
 
             setStudents(response.data);
 
-        } catch(error){
+        } 
+        catch(error){
 
             console.log(error);
 
@@ -25,85 +27,167 @@ function AdminDashboard(){
 
     };
 
+
     const deleteStudent = async (student_id)=>{
 
-    try{
+        try{
 
-        await API.delete(
-            `/students/${student_id}`
-        );
-
-
-        alert("Student deleted successfully");
+            await API.delete(
+                `/students/${student_id}`
+            );
 
 
-        getStudents();
+            alert("Student deleted successfully");
 
 
-    }
-    catch(error){
+            getStudents();
 
-        console.log(error);
 
-        alert("Student deletion failed");
+        }
+        catch(error){
 
-    }
+            console.log(error);
 
-};
+            alert("Student deletion failed");
+
+        }
+
+    };
 
 
     return(
 
-        <div>
+        <div className="dashboard">
+
 
             <h1>
                 Admin Dashboard
             </h1>
 
-            <CreateStudent onStudentCreated={getStudents} />
-            <UpdateStudent student={selectedStudent} />
-
-            <button onClick={getStudents}>
-                View Students
-            </button>
 
 
-            <h2>
-                Student List
-            </h2>
+            {/* Create Student Section */}
+
+            <div className="section-card">
+
+                <CreateStudent 
+                    onStudentCreated={getStudents}
+                />
+
+            </div>
 
 
-            {
-                students.map((student)=>(
 
-                    <div key={student.id}>
+            {/* View Students Button */}
 
-                        <p>
-                            Name: {student.full_name}
-                        </p>
+            <div className="section-card">
 
-                        <p>
-                            Email: {student.email}
-                        </p>
 
-                        <button 
-                            onClick={() => setSelectedStudent(student)}
+                <button onClick={getStudents}>
+
+                    View Students
+
+                </button>
+
+
+            </div>
+
+            {/* Update Student Section */}
+
+            <div className="section-card">
+
+                <UpdateStudent 
+                    student={selectedStudent}
+                />
+
+            </div>
+
+
+
+
+            {/* Student List Section */}
+
+            <div className="section-card">
+
+
+                <h2>
+                    Student List
+                </h2>
+
+
+
+                {
+
+                    students.map((student)=>(
+
+
+                        <div 
+                            key={student.id}
+                            className="student-card"
                         >
-                            Update
-                        </button>
-                        
-                        <button
-                            onClick={() => deleteStudent(student.id)}
-                        >
-                            Delete
-                        </button>
 
-                        <hr/>
 
-                    </div>
 
-                ))
-            }
+                            <p>
+                                <strong>Name:</strong> {student.full_name}
+                            </p>
+
+
+
+                            <p>
+                                <strong>Email:</strong> {student.email}
+                            </p>
+
+
+
+                            <div className="action-buttons">
+
+
+                                <button
+
+                                    onClick={() => 
+                                        setSelectedStudent(student)
+                                    }
+
+                                >
+
+                                    Update
+
+                                </button>
+
+
+
+
+                                <button
+
+                                    className="delete-btn"
+
+                                    onClick={() => 
+                                        deleteStudent(student.id)
+                                    }
+
+                                >
+
+                                    Delete
+
+                                </button>
+
+
+
+                            </div>
+
+
+
+                        </div>
+
+
+                    ))
+
+                }
+
+
+            </div>
+
 
 
         </div>
